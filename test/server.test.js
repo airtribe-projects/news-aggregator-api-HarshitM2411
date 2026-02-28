@@ -1,20 +1,39 @@
 const tap = require('tap');
 const supertest = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+process.env.NODE_ENV = 'test';
+
 const app = require('../app');
 const server = supertest(app);
+
+let mongod;
+
+tap.before(async () => {
+    mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
+    await mongoose.connect(uri);
+});
+
+tap.teardown(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongod.stop();
+});
 
 const mockUser = {
     name: 'Clark Kent',
     email: 'clark@superman.com',
     password: 'Krypt()n8',
-    preferences:['movies', 'comics']
+    preferences: ['movies', 'comics']
 };
 
 let token = '';
 
 // Auth tests
 
-tap.test('POST /users/signup', async (t) => { 
+tap.test('POST /users/signup', async (t) => {
     const response = await server.post('/users/signup').send(mockUser);
     t.equal(response.status, 200);
     t.end();
@@ -29,7 +48,7 @@ tap.test('POST /users/signup with missing email', async (t) => {
     t.end();
 });
 
-tap.test('POST /users/login', async (t) => { 
+tap.test('POST /users/login', async (t) => {
     const response = await server.post('/users/login').send({
         email: mockUser.email,
         password: mockUser.password
@@ -70,6 +89,7 @@ tap.test('PUT /users/preferences', async (t) => {
         preferences: ['movies', 'comics', 'games']
     });
     t.equal(response.status, 200);
+    t.end();
 });
 
 tap.test('Check PUT /users/preferences', async (t) => {
@@ -92,10 +112,4 @@ tap.test('GET /news without token', async (t) => {
     const response = await server.get('/news');
     t.equal(response.status, 401);
     t.end();
-});
-
-
-
-tap.teardown(() => {
-    process.exit(0);
 });
