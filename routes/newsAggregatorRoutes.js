@@ -8,7 +8,7 @@ const {
     updatePreferences
 } = require('../controllers/newsAggregatorController');
 
-
+// POST /users/signup - Register a new user
 router.post('/signup', async (req, res) => {
     const user = req.body;
     if (!user.email) {
@@ -25,6 +25,7 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+// POST /users/login - Authenticate user and return JWT
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const status = await loginUser({ email, password });
@@ -43,11 +44,20 @@ router.post('/login', async (req, res) => {
 
 router.use(validateJWT);
 
+// GET /users/preferences - Get user preferences
 router.get('/preferences', async (req, res) => {
     const status = await getUserPreferences(req.user.email);
-    res.status(200).send({ message: status.message, preferences: status.preferences });
+    switch (status.message) {
+        case 'User not found':
+            res.status(404).send({ message: status.message, preferences: status.preferences });
+            return;
+        case 'Preferences retrieved successfully':
+            res.status(200).send({ message: status.message, preferences: status.preferences });
+            return;
+    }
 });
 
+// PUT /users/preferences - Update user preferences
 router.put('/preferences', async (req, res) => {
     const payload = req.body.preferences;
     if (!payload) {
@@ -55,7 +65,15 @@ router.put('/preferences', async (req, res) => {
         return;
     }
     const status = await updatePreferences(req.user.email, payload);
-    res.status(200).send({ message: status.message, preferences: status.preferences });
+    switch (status.message) {
+        case 'User not found':
+            res.status(404).send({ message: status.message, preferences: status.preferences });
+            return;
+        case 'Preferences updated successfully':
+            res.status(200).send({ message: status.message, preferences: status.preferences });
+            return;
+    }
+
 });
 
 

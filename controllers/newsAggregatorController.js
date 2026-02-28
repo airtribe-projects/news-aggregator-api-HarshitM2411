@@ -4,6 +4,7 @@ const SALT_ROUND = 5;
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// Function to register a new user
 const registerUser = async (user) => {
     try {
         // Validate before hashing, otherwise Mongoose validates the hash not the original password
@@ -20,6 +21,7 @@ const registerUser = async (user) => {
     }
 };
 
+// Function to authenticate user and return JWT
 const loginUser = async ({ email, password }) => {
     const dbUser = await users.findOne({ email });
 
@@ -37,17 +39,25 @@ const loginUser = async ({ email, password }) => {
     return { message: 'Login successful', token };
 }
 
+// Function to get user preferences
 const getUserPreferences = async (email) => {
     const dbUser = await users.findOne({ email });
+    if (!dbUser) {
+        return { message: 'User not found', preferences: null };
+    }
     return { message: 'Preferences retrieved successfully', preferences: dbUser.preferences };
 }
 
+// Function to update user preferences
 const updatePreferences = async (email, preferences) => {
     const dbUser = await users.findOneAndUpdate(
         { email }, //filter
         { preferences }, //update
         { new: true, runValidators: true } //return updated document
     );
+    if (!dbUser) {
+        return { message: 'User not found', preferences: null };
+    }
     return { message: 'Preferences updated successfully', preferences: dbUser.preferences };
 }
 

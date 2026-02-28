@@ -26,14 +26,14 @@ const mockUser = {
     name: 'Clark Kent',
     email: 'clark@superman.com',
     password: 'Krypt()n8',
-    preferences:['movies', 'comics']
+    preferences: ['movies', 'comics']
 };
 
 let token = '';
 
 // Auth tests
 
-tap.test('POST /users/signup', async (t) => { 
+tap.test('POST /users/signup', async (t) => {
     const response = await server.post('/users/signup').send(mockUser);
     t.equal(response.status, 200);
     t.end();
@@ -48,7 +48,7 @@ tap.test('POST /users/signup with missing email', async (t) => {
     t.end();
 });
 
-tap.test('POST /users/login', async (t) => { 
+tap.test('POST /users/login', async (t) => {
     const response = await server.post('/users/login').send({
         email: mockUser.email,
         password: mockUser.password
@@ -89,6 +89,7 @@ tap.test('PUT /users/preferences', async (t) => {
         preferences: ['movies', 'comics', 'games']
     });
     t.equal(response.status, 200);
+    t.end();
 });
 
 tap.test('Check PUT /users/preferences', async (t) => {
@@ -112,6 +113,3 @@ tap.test('GET /news without token', async (t) => {
     t.equal(response.status, 401);
     t.end();
 });
-
-
-
