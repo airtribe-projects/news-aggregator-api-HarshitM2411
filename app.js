@@ -1,17 +1,28 @@
 const express = require('express');
-const app = express();
-const port = 3000;
+const mongoose = require('mongoose');
+require('dotenv').config();
+const logger = require('./middleware/newsAggregatorMiddleWare');
+const router = require('./routes/newsAggregatorRoutes');
 
+const app = express();
+const PORT = process.env.PORT;
+const URI = process.env.MONGODB_URI;
+
+app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/users', router);
 
-app.listen(port, (err) => {
-    if (err) {
-        return console.log('Something bad happened', err);
-    }
-    console.log(`Server is listening on ${port}`);
+app.get('/', (req, res) => {
+    res.send("Welcome to the News Aggregator API");
 });
 
+mongoose.connect(URI).then(() => {
+    console.log("Connected to MongodDB via Mongoose");
+    app.listen(PORT, () => {
+        console.log("Express application started on port", PORT);
+    });
+});
 
 
 module.exports = app;
