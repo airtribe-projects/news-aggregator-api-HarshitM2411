@@ -10,6 +10,11 @@ const validateJWT = (req, res, next) => {
         return;
     }
 
+    // Remove 'Bearer ' prefix if present
+    if (token.startsWith('Bearer ')) {
+        token = token.slice(7);
+    }
+
     try {
         const decoded = jwtwebtoken.verify(token, JWT_SECRET);
         req.user = decoded;  // Attach decoded user info to request
