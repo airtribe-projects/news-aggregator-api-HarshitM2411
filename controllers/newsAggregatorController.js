@@ -6,9 +6,19 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const axios = require('axios');
 
 const registerUser = async (user) => {
-    user.password = await bcrypt.hash(user.password, SALT_ROUND);
-    const dbUser = await users.create(user);
-    return dbUser;
+    try {
+        // Validate before hashing, otherwise Mongoose validates the hash not the original password
+        const tempUser = new users(user);
+        await tempUser.validate();
+
+        user.password = await bcrypt.hash(user.password, SALT_ROUND);
+        const dbUser = await users.create(user);
+        return { message: 'User registered successfully', user: dbUser, status: 200 };
+    } catch (error) {
+        const status = 400;
+        const message = error.message;
+        return { status, message, user: null };
+    }
 };
 
 const loginUser = async ({ email, password }) => {

@@ -16,8 +16,14 @@ router.post('/signup', async (req, res) => {
         res.status(400).send({ message: 'Email is required' });
         return;
     }
-    const dbUser = await registerUser(user);
-    res.status(200).send(dbUser);
+    const result = await registerUser(user);
+    switch (result.message) {
+        case 'User registered successfully':
+            res.status(result.status).send({ message: result.message, user: result.user });
+            return;
+        default:
+            res.status(result.status).send({ message: result.message, user: result.user });
+    }
 });
 
 router.post('/login', async (req, res) => {
