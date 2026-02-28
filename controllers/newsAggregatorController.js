@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const SALT_ROUND = 5;
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
-const axios = require('axios');
 
 const registerUser = async (user) => {
     try {
@@ -22,8 +21,7 @@ const registerUser = async (user) => {
 };
 
 const loginUser = async ({ email, password }) => {
-    const body = { email };
-    const dbUser = await users.findOne(body);
+    const dbUser = await users.findOne({ email });
 
     if (!dbUser) {
         return { message: 'User not found', token: null };
@@ -40,8 +38,7 @@ const loginUser = async ({ email, password }) => {
 }
 
 const getUserPreferences = async (email) => {
-    const body = { email };
-    const dbUser = await users.findOne(body);
+    const dbUser = await users.findOne({ email });
     return { message: 'Preferences retrieved successfully', preferences: dbUser.preferences };
 }
 
@@ -54,33 +51,9 @@ const updatePreferences = async (email, preferences) => {
     return { message: 'Preferences updated successfully', preferences: dbUser.preferences };
 }
 
-const getPrefferedNews = async (email) => {
-    const body = { email };
-    const dbUser = await users.findOne(body);
-    if (!dbUser) {
-        return { message: 'User not found', news: [] };
-    }
-
-    try {
-        const response = await axios.get('https://newsapi.org/v2/everything', {
-            headers: {
-                'X-Api-Key': process.env.NEWS_API_KEY
-            },
-            params: {
-                q: dbUser.preferences.join(),
-            }
-        });
-        return { message: 'News retrieved successfully', news: response.data };
-
-    } catch (error) {
-        return { message: 'Error fetching news', news: [] };
-    }
-}
-
 module.exports = {
     registerUser,
     loginUser,
     getUserPreferences,
-    updatePreferences,
-    getPrefferedNews
+    updatePreferences
 }
