@@ -1,7 +1,26 @@
 const tap = require('tap');
 const supertest = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+process.env.NODE_ENV = 'test';
+
 const app = require('../app');
 const server = supertest(app);
+
+let mongod;
+
+tap.before(async () => {
+    mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
+    await mongoose.connect(uri);
+});
+
+tap.teardown(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongod.stop();
+});
 
 const mockUser = {
     name: 'Clark Kent',
@@ -96,6 +115,3 @@ tap.test('GET /news without token', async (t) => {
 
 
 
-tap.teardown(() => {
-    process.exit(0);
-});

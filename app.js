@@ -19,12 +19,14 @@ app.get('/', (req, res) => {
     res.send("Welcome to the News Aggregator API");
 });
 
-mongoose.connect(URI).then(() => {
-    console.log("Connected to MongodDB via Mongoose");
-    app.listen(PORT, () => {
-        console.log("Express application started on port", PORT);
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect(URI).then(() => {
+        console.log("Connected to MongodDB via Mongoose");
+        app.listen(PORT, () => {
+            console.log("Express application started on port", PORT);
+        });
     });
-});
+}
 
 
 module.exports = app;
