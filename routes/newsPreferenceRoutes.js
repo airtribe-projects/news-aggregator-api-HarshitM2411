@@ -1,7 +1,7 @@
 const express = require('express');
 const newsPreferenceRouter = express.Router();
 const { validateJWT } = require('../middleware/validateJWT');
-const { getPrefferedNews } = require('../controllers/newsPreferenceConroller');
+const { getPrefferedNews } = require('../controllers/newsPreferenceController');
 
 newsPreferenceRouter.use(validateJWT);
 newsPreferenceRouter.get('/', async (req, res) => {
